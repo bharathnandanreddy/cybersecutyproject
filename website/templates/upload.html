@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="col-md-12 mx-auto "  action="/datapull">
+  
+  <form method="POST" enctype="multipart/form-data" >
+
+
+        <div class="mb-3">
+          <label for="uploadfile" class="form-label">Upload file to encrypt:</label>
+          <input required type="file" class="form-control" name="uploadfile" id="uploadfile">
+        </div>
+    <div class="mb-3">
+      <input type="submit" class="btn btn-primary" value="Upload">
+    </div>
+  </form>
+
+  {% if display %}
+
+  <p>Your file has been uploaded <a id="customanchor" href="/download/{{fileID}}">click here</a> to download</p>
+  
+  {% endif %}
+</div>
+
+
+
+
+<style>
+.card {
+  height: 400px;
+  overflow-x: auto;
+}
+.table {
+  width: auto !important;
+  min-width: 100%;
+}
+#uploadfile{
+  width: fit-content;
+  margin:0 auto;
+}
+#customanchor{
+  text-decoration: underline; color: #0d6efd;
+}
+#customanchor:hover{
+  text-decoration: underline; color: lightblue;
+}
+
+
+
+
+</style>
+
+{% endblock %}
