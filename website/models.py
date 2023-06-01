@@ -10,11 +10,18 @@ class User(UserMixin,db.Model):
     fname = db.Column(db.String(1000))
     lname = db.Column(db.String(1000))
 
+class AccessKey(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    upload_id = db.Column(db.Integer, db.ForeignKey('upload.id'))
+    key = db.Column(db.String(100))
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+
 
 class Upload(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     user = db.relationship('User', backref=db.backref('uploads', lazy=True))
     filename = db.Column(db.String(50))
-    data = db.Column(db.LargeBinary)
+    data = db.Column(db.Text)
     upload_date = db.Column(db.DateTime, default=datetime.datetime.utcnow)
+    iv = db.Column(db.LargeBinary)
