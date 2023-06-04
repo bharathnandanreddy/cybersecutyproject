@@ -1,4 +1,4 @@
-from flask import Blueprint,request
+from flask import Blueprint,request, Response
 from flask import render_template,send_file
 from flask_login import login_required, current_user
 from io import BytesIO
@@ -49,6 +49,7 @@ def upload_post():
         # encrypt AES256
         iv = AES256.shake_256(rn, AES.block_size)
         ct = AES256.encrypt(key, message, iv)
+
         
         #save public key
         upload = Upload(filename=file.filename, data=ct, iv=iv, user_id=current_user.id)
@@ -66,17 +67,27 @@ def upload_post():
 @main.route('/download/<upload_id>')
 def download(upload_id):
     upload = Upload.query.filter_by(id=upload_id).first()
+    try:
+        access_key = AccessKey.query.filter_by(upload_id=upload.id, user_id=current_user.id).first()
+        if access_key:
+            # decrypt AES256
+            AES256 = aes256()
+            key=access_key.key
+            ct=upload.data
+            iv=upload.iv
+            pt = AES256.decrypt(ct, key, iv)
+            
+            return send_file(BytesIO(pt), download_name=upload.filename, as_attachment=True )
+        else:
+            return Response(
+        upload.data,
+        mimetype='text/csv',
+        headers={'Content-disposition': 'attachment; filename='+upload.filename})
 
-    access_key = AccessKey.query.filter_by(upload_id=upload.id, user_id=current_user.id).first()
-    if access_key:
-        # decrypt AES256
-        AES256 = aes256()
-        key=access_key.key
-        ct=upload.data
-        iv=upload.iv
-        pt = AES256.decrypt(ct, key, iv)
+    except:
+        return Response(
+        upload.data,
+        mimetype='text/csv',
+        headers={'Content-disposition': 'attachment; filename='+upload.filename})
+
         
-        return send_file(BytesIO(pt), download_name=upload.filename, as_attachment=True )
-    else:
-        return "Access Denied", 403
-    
